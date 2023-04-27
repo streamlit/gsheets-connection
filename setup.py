@@ -1,0 +1,44 @@
+import setuptools
+
+VERSION = "0.0.1"  # PEP-440
+
+NAME = "streamlit_gsheets"
+
+INSTALL_REQUIRES = [
+    "streamlit>=1.21.0",
+    "gspread>=5.8.0",
+    "gspread-pandas>=3.2.2",
+    "gspread-dataframe>=3.3.0",
+    "gspread-formatting>=1.1.2",
+    "duckdb>=0.7.1",
+    "sql-metadata>=2.7.0",
+    "validators>=0.20.0",
+]
+
+
+setuptools.setup(
+    name=NAME,
+    version=VERSION,
+    description="Streamlit Connection for Google Sheets.",
+    url="https://github.com/sfc-gh-jcarroll/st-connection-prpr",
+    project_urls={
+        "Source Code": "https://github.com/sfc-gh-jcarroll/st-connection-prpr",
+    },
+    author="Tomasz Szerszeń",
+    author_email="tomasz.szerszen@snowflake.com",
+    license="Apache License 2.0",
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Environment :: Console",
+        "Environment :: Web Environment",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: Apache Software License",
+        "Programming Language :: Python :: 3.10",
+    ],
+    # Snowpark requires Python 3.8
+    python_requires=">=3.8",
+    # Requirements
+    install_requires=INSTALL_REQUIRES,
+    packages=["streamlit_gsheets"],
+)
