@@ -8,6 +8,7 @@ st.write("#### 1. Read public Google Worksheet as Pandas")
 
 with st.echo():
     import streamlit as st
+
     from streamlit_gsheets import GSheetsConnection
 
     conn = st.experimental_connection("gsheets", type=GSheetsConnection)
@@ -30,6 +31,7 @@ st.warning(
 
 with st.echo():
     import streamlit as st
+
     from streamlit_gsheets import GSheetsConnection
 
     conn = st.experimental_connection("gsheets", type=GSheetsConnection)
