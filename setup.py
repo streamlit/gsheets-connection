@@ -22,7 +22,7 @@ setuptools.setup(
     description="Streamlit Connection for Google Sheets.",
     url="https://github.com/streamlit/gsheets-connection",
     project_urls={
-        "Source code": "https://github.com/streamlit/gsheets-connection",
+        "Source Code": "https://github.com/streamlit/gsheets-connection",
     },
     author="Tomasz Szerszeń",
     author_email="tomasz.szerszen@snowflake.com",
