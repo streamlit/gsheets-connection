@@ -1,0 +1,4 @@
+../../streamlit-1.21.0-py2.py3-none-any.whl
+# streamlit==1.22
+# git+https://github.com/sfc-gh-jcarroll/st-connection-prpr.git#subdirectory=gsheets_connection
+pandasql  # this is for examples/ only
