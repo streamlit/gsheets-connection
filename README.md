@@ -115,8 +115,6 @@ git+https://github.com/sfc-gh-jcarroll/st-connection-prpr.git#subdirectory=gshee
 pandasql  # this is for example/st_app.py only
 ```
 
-**Note on install:** Streamlit 1.22 is not yet released; you can find a compatible .whl file
-[here](https://core-previews.s3-us-west-2.amazonaws.com/pr-6457/streamlit-1.21.0-py2.py3-none-any.whl).
 
 ## Full example
 Check gsheets_connection/example directory for full example of the usage.
