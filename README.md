@@ -111,10 +111,9 @@ client_x509_cert_url = ""
 # requirements.txt
 
 streamlit==1.22
-git+https://github.com/sfc-gh-jcarroll/st-connection-prpr.git#subdirectory=gsheets_connection
+git+https://github.com/streamlit/gsheets-connection
 pandasql  # this is for example/st_app.py only
 ```
-
 
 ## Full example
 Check gsheets_connection/example directory for full example of the usage.

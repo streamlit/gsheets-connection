@@ -5,7 +5,7 @@ VERSION = "0.0.1"  # PEP-440
 NAME = "streamlit_gsheets"
 
 INSTALL_REQUIRES = [
-    "streamlit>=1.21.0",
+    "streamlit>=1.22.0",
     "gspread>=5.8.0",
     "gspread-pandas>=3.2.2",
     "gspread-dataframe>=3.3.0",
@@ -20,9 +20,9 @@ setuptools.setup(
     name=NAME,
     version=VERSION,
     description="Streamlit Connection for Google Sheets.",
-    url="https://github.com/sfc-gh-jcarroll/st-connection-prpr",
+    url="https://github.com/streamlit/gsheets-connection",
     project_urls={
-        "Source Code": "https://github.com/sfc-gh-jcarroll/st-connection-prpr",
+        "Source Code": "https://github.com/streamlit/gsheets-connection",
     },
     author="Tomasz Szerszeń",
     author_email="tomasz.szerszen@snowflake.com",
