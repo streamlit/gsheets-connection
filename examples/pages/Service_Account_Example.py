@@ -198,7 +198,7 @@ with st.echo():
     # click button to delete worksheet using the underlying gspread API
     # This is behind a button to avoid exceeding Google API Quota
     if st.button("Delete worksheet"):
-        spreadsheet = conn.client._open_spreadsheet()
+        spreadsheet = conn.client._open_spreadsheet()  # type: ignore
         worksheet = spreadsheet.worksheet("Example 1")
         spreadsheet.del_worksheet(worksheet)
         st.cache_data.clear()

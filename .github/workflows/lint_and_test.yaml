@@ -18,7 +18,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install ruff pytest
+          pip install ruff pytest mypy
+          mypy --install-types
           if [ -f test-requirements.txt ]; then pip install -r test-requirements.txt; fi
       - name: Lint with ruff
         run: |
@@ -26,6 +27,9 @@ jobs:
           ruff --format=github --select=E9,F63,F7,F82 --target-version=py37 .
           # default set of ruff rules with GitHub Annotations
           ruff --format=github --target-version=py37 .
+      - name: Check types with mypy
+        run: |
+          mypy --ignore-missing-imports .
       - name: Test with pytest
         run: |
           pytest
