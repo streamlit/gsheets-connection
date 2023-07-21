@@ -20,13 +20,13 @@ docs_url = (
 
 st.write("#### 2. Initial setup")
 st.markdown(
-    """
+    f"""
 ## Initial setup for CRUD mode
 
 1. Setup `.streamlit/secrets.toml` inside your Streamlit app root directory,
-check out [Secret management
-documentation]()
-for references. 2. [Enable API Access for a
+check out [Secret management documentation]({docs_url}) for references.
+
+2. [Enable API Access for a
 Project](https://docs.gspread.org/en/v5.7.1/oauth2.html#enable-api-access-for-a-project)
     * Head to [Google Developers Console](https://console.developers.google.com/) and
       create a new project (or select the one you already have).
@@ -48,7 +48,7 @@ Project](https://docs.gspread.org/en/v5.7.1/oauth2.html#enable-api-access-for-a-
 
 You will automatically download a JSON file with credentials. It may look like this:
 ```
-{
+{{
     "type": "service_account",
     "project_id": "api-project-XXX",
     "private_key_id": "2cd … ba4",
@@ -56,10 +56,12 @@ You will automatically download a JSON file with credentials. It may look like t
     "client_email": "473000000000-yoursisdifferent@developer.gserviceaccount.com",
     "client_id": "473 … hd.apps.googleusercontent.com",
     ...
-}
+}}
 ```
 Remember the path to the downloaded credentials file. Also, in the next step you’ll need
-the value of client_email from this file. * **:red[Very important!]** Go to your
+the value of client_email from this file.
+
+* **:red[Very important!]** Go to your
 spreadsheet and share it with a client_email from the step above. Just like you do with
 any other Google account. If you don’t do this, you’ll get a
 `gspread.exceptions.SpreadsheetNotFound` exception when trying to access this
