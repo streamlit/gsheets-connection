@@ -1,11 +1,12 @@
-import streamlit as st
 import pandasql as psql
+import streamlit as st
 
 st.subheader("📗 Google Sheets st.connection using Service Account")
 
 st.write("#### 1. API Reference")
 with st.echo():
     import streamlit as st
+
     from streamlit_gsheets import GSheetsConnection
 
     conn = st.experimental_connection("gsheets", type=GSheetsConnection)
@@ -17,7 +18,7 @@ st.markdown(
     """
 ## Initial setup for CRUD mode
 
-1. Setup `.streamlit/secrets.toml` inside your Streamlit app root directory,  
+1. Setup `.streamlit/secrets.toml` inside your Streamlit app root directory,
 check out [Secret management documentation](https://docs.streamlit.io/streamlit-community-cloud/get-started/deploy-an-app/connect-to-data-sources/secrets-management) for references.
 2. [Enable API Access for a Project](https://docs.gspread.org/en/v5.7.1/oauth2.html#enable-api-access-for-a-project)
     * Head to [Google Developers Console](https://console.developers.google.com/) and create a new project (or select the one you already have).
@@ -72,6 +73,7 @@ st.write("#### 3. Load DataFrame into Google Sheets")
 
 with st.echo():
     import streamlit as st
+
     from streamlit_gsheets import GSheetsConnection
 
     # Create GSheets connection
@@ -80,22 +82,29 @@ with st.echo():
     # Demo Births DataFrame
     df = psql.load_births()
 
-    # set create_spreadsheet to True to create spreadsheet,
-    # create_spreadsheet is False by default to avoid exceeding Google API Quota
-    create_spreadsheet = False
-
-    if create_spreadsheet:
+    # click button to update worksheet
+    # This is behind a button to avoid exceeding Google API Quota
+    if st.button("Create new worksheet"):
         df = conn.create(
             worksheet="Example 1",
             data=df,
         )
+        st.cache_data.clear()
+        st.experimental_rerun()
 
     # Display our Spreadsheet as st.dataframe
     st.dataframe(df.head(10))
 
+
 st.write("#### 4. Read Google WorkSheet as DataFrame")
+st.info(
+    "If the sheet has been deleted, press 'Create new worksheet' button above.",
+    icon="ℹ️",
+)
+
 with st.echo():
     import streamlit as st
+
     from streamlit_gsheets import GSheetsConnection
 
     # Create GSheets connection
@@ -103,6 +112,7 @@ with st.echo():
 
     # Read Google WorkSheet as DataFrame
     df = conn.read(
+        worksheet="Example 1",
         usecols=[
             0,
             1,
@@ -115,6 +125,7 @@ with st.echo():
 st.write("#### 5. Update Google WorkSheet using DataFrame")
 with st.echo():
     import streamlit as st
+
     from streamlit_gsheets import GSheetsConnection
 
     # Create GSheets connection
@@ -123,15 +134,15 @@ with st.echo():
     # Demo Meat DataFrame
     df = psql.load_meat()
 
-    # set update_spreadsheet to True to update spreadsheet,
-    # update_spreadsheet is False by default to avoid exceeding Google API Quota
-    update_spreadsheet = False
-
-    if update_spreadsheet:
+    # click button to update worksheet
+    # This is behind a button to avoid exceeding Google API Quota
+    if st.button("Update worksheet"):
         df = conn.update(
             worksheet="Example 1",
             data=df,
         )
+        st.cache_data.clear()
+        st.experimental_rerun()
 
     # Display our Spreadsheet as st.dataframe
     st.dataframe(df.head(10))
@@ -145,6 +156,7 @@ st.info(
 
 with st.echo():
     import streamlit as st
+
     from streamlit_gsheets import GSheetsConnection
 
     # Create GSheets connection
@@ -162,17 +174,25 @@ with st.echo():
 st.write("#### 7. Clear/delete worksheet")
 with st.echo():
     import streamlit as st
+
     from streamlit_gsheets import GSheetsConnection
 
     # Create GSheets connection
     conn = st.experimental_connection("gsheets", type=GSheetsConnection)
 
-    # set clear_worksheet to True to update spreadsheet,
-    # clear_worksheet is False by default to avoid exceeding Google API Quota
-    clear_worksheet = False
-
-    if clear_worksheet:
+    # click button to update worksheet
+    # This is behind a button to avoid exceeding Google API Quota
+    if st.button("Clear worksheet"):
         conn.clear(worksheet="Example 1")
-        # Uncomment this to delete worksheet Example 1
-        # conn.delete(spreadsheet=spreadsheet, worksheet="Example 1")
         st.info("Worksheet Example 1 Cleared!")
+        st.cache_data.clear()
+        st.experimental_rerun()
+
+    # click button to delete worksheet using the underlying gspread API
+    # This is behind a button to avoid exceeding Google API Quota
+    if st.button("Delete worksheet"):
+        spreadsheet = conn.client._open_spreadsheet()
+        worksheet = spreadsheet.worksheet("Example 1")
+        spreadsheet.del_worksheet(worksheet)
+        st.cache_data.clear()
+        st.experimental_rerun()

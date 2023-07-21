@@ -36,7 +36,5 @@ with st.echo():
 
     conn = st.experimental_connection("gsheets", type=GSheetsConnection)
 
-    df = conn.query(
-        'select births from "Example 2" limit 10', spreadsheet=url, usecols=[0, 1]
-    )
+    df = conn.query('select births from "Example 2" limit 10', spreadsheet=url)
     st.dataframe(df)

@@ -22,6 +22,7 @@ from urllib.parse import parse_qs, urlparse
 import duckdb
 from gspread import service_account_from_dict
 from gspread.client import Client as GSpreadClient
+from gspread.client import SpreadsheetNotFound
 from gspread.spreadsheet import Spreadsheet
 from gspread.worksheet import Worksheet
 from gspread_dataframe import get_as_dataframe, set_with_dataframe
@@ -161,8 +162,6 @@ class GSheetsServiceAccountClient(GSheetsClient):
 
         if not spreadsheet and self._spreadsheet:
             spreadsheet = self._spreadsheet
-        else:
-            raise ValueError("Spreadsheet must be specified")
         if not folder_id and self._worksheet:
             folder_id = self._worksheet
 
@@ -272,17 +271,32 @@ class GSheetsServiceAccountClient(GSheetsClient):
         if not folder_id and self._worksheet:
             folder_id = self._worksheet
 
-        new_spreadsheet = self._client.create(title=spreadsheet, folder_id=folder_id)
-        new_worksheet = new_spreadsheet.add_worksheet(
-            title=worksheet, rows=1000, cols=26
-        )
+        try:
+            new_spreadsheet = self._open_spreadsheet(
+                spreadsheet=spreadsheet, folder_id=folder_id
+            )
+        except SpreadsheetNotFound:
+            new_spreadsheet = self._client.create(
+                title=spreadsheet, folder_id=folder_id
+            )
 
         if is_dataframe_compatible(data):
             return_data = convert_anything_to_df(data)
         elif type(data) is ndarray:
             return_data = DataFrame.from_records(data)
         else:
+            new_spreadsheet.add_worksheet(
+                title=worksheet,
+                rows=0,
+                cols=0,
+            )
             return None
+
+        n_rows, n_cols = return_data.shape
+
+        new_worksheet = new_spreadsheet.add_worksheet(
+            title=worksheet, rows=n_rows, cols=n_cols
+        )
 
         set_with_dataframe(new_worksheet, return_data)
         set_format_with_dataframe(
@@ -397,13 +411,11 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
         worksheet: Optional[Union[int, str]] = None,
         ttl: Optional[Union[int, timedelta, None]] = 3600,
         max_entries: Optional[Union[int, None]] = None,
-        evaluate_formulas: bool = True,
-        folder_id: Optional[str] = None,
         **options,
     ) -> DataFrame:
-        if not spreadsheet and self._spreadsheet:
-            spreadsheet = self._spreadsheet
-        else:
+        spreadsheet = spreadsheet or self._spreadsheet
+
+        if not spreadsheet:
             raise ValueError("Spreadsheet must be specified")
 
         if not worksheet and self._worksheet:
@@ -415,6 +427,9 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
         @cache_data(ttl=ttl, max_entries=max_entries)
         def _get_as_dataframe(url: str, **options) -> DataFrame:
             return read_csv(url, **options)
+
+        for arg in ["evaluate_formulas", "folder_id"]:
+            options.pop(arg, None)
 
         return _get_as_dataframe(url, **options)
 
@@ -428,12 +443,11 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
         max_entries: Optional[Union[int, None]] = None,
         **options,
     ) -> DataFrame:
-        if not spreadsheet and self._spreadsheet:
-            spreadsheet = self._spreadsheet
-        else:
+        spreadsheet = spreadsheet or self._spreadsheet
+        worksheet = worksheet or self._worksheet
+
+        if not spreadsheet:
             raise ValueError("Spreadsheet must be specified")
-        if not worksheet and self._worksheet:
-            worksheet = self._worksheet
 
         url = self._get_download_as_csv_url(
             spreadsheet=spreadsheet, worksheet=worksheet
@@ -448,6 +462,9 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
                 in_memory_db.sql(create_table_sql)
                 _ = df
             return in_memory_db.sql(query=sql).to_df()
+
+        for arg in ["evaluate_formulas", "folder_id"]:
+            options.pop(arg, None)
 
         return _query(sql, url, **options)
 
@@ -766,5 +783,4 @@ class GSheetsConnection(ExperimentalBaseConnection[GSheetsClient], GSheetsClient
         - Learn more using `st.help()`
         ---
         """
-        return md
         return md
