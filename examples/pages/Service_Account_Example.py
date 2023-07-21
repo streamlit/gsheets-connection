@@ -49,11 +49,13 @@ Project](https://docs.gspread.org/en/v5.7.1/oauth2.html#enable-api-access-for-a-
 You will automatically download a JSON file with credentials. It may look like this:
 ```
 {
-    "type": "service_account", "project_id": "api-project-XXX", "private_key_id": "2cd …
-    ba4", "private_key": "-----BEGIN PRIVATE KEY-----\nNrDyLw … jINQh/9\n-----END
-    PRIVATE KEY-----\n", "client_email":
-    "473000000000-yoursisdifferent@developer.gserviceaccount.com", "client_id": "473 …
-    hd.apps.googleusercontent.com", ...
+    "type": "service_account",
+    "project_id": "api-project-XXX",
+    "private_key_id": "2cd … ba4",
+    "private_key": "-----BEGIN PRIVATE KEY-----\\nNrDyLw … jINQh/9\\n-----END PRIVATE KEY-----\\n",
+    "client_email": "473000000000-yoursisdifferent@developer.gserviceaccount.com",
+    "client_id": "473 … hd.apps.googleusercontent.com",
+    ...
 }
 ```
 Remember the path to the downloaded credentials file. Also, in the next step you’ll need
