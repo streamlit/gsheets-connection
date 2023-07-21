@@ -5,7 +5,7 @@ VERSION = "0.0.1"  # PEP-440
 NAME = "streamlit_gsheets"
 
 INSTALL_REQUIRES = [
-    "streamlit>=1.21.0",
+    "streamlit>=1.22.0",
     "gspread>=5.8.0",
     "gspread-pandas>=3.2.2",
     "gspread-dataframe>=3.3.0",

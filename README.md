@@ -3,11 +3,36 @@
 Connect to public or private Google Sheets from your Streamlit app. Powered by `st.experimental_connection()` and [gspread](https://github.com/burnash/gspread).
 
 GSheets Connection works in two modes:
+
 * in Read Only mode, using publicly shared Spreadsheet URLs (Read Only mode)
 * CRUD operations support mode, with Authentication using Service Account. In order to use Service Account mode you need to enable Google Drive and Google Sheets API in [Google Developers Console](https://console.developers.google.com/).
 Follow **Initial setup for CRUD mode** section in order to authenticate your Streamlit app first.
 
-## Initial setup for CRUD mode
+## Install
+
+```sh
+pip install streamlit git+https://github.com/streamlit/gsheets-connection
+```
+
+## Minimal example: publicly shared spreadsheet (read-only)
+
+```python
+# example/st_app.py
+
+import streamlit as st
+from streamlit_gsheets import GSheetsConnection
+
+url = "https://docs.google.com/spreadsheets/d/1JDy9md2VZPz4JbYtRPJLs81_3jUK47nx6GYQjgU8qNY/edit?usp=sharing"
+
+conn = st.experimental_connection("gsheets", type=GSheetsConnection)
+
+data = conn.read(spreadsheet=url, usecols=[0, 1])
+st.dataframe(data)
+```
+
+## Service account / CRUD example
+
+### Initial setup for private spreadsheet and/or CRUD mode
 
 1. Setup `.streamlit/secrets.toml` inside your Streamlit app root directory,  
 check out [Secret management documentation](https://docs.streamlit.io/streamlit-community-cloud/get-started/deploy-an-app/connect-to-data-sources/secrets-management) for references.
@@ -58,22 +83,7 @@ auth_provider_x509_cert_url = ""
 client_x509_cert_url = ""
 ```
 
-## Publicly Shared Spreadsheet Example
-```python
-# example/st_app.py
-
-import streamlit as st
-from streamlit_gsheets import GSheetsConnection
-
-url = "https://docs.google.com/spreadsheets/d/1JDy9md2VZPz4JbYtRPJLs81_3jUK47nx6GYQjgU8qNY/edit?usp=sharing"
-
-conn = st.experimental_connection("gsheets", type=GSheetsConnection)
-
-data = conn.read(spreadsheet=url, usecols=[0, 1])
-st.dataframe(data)
-```
-
-## Service Account Example
+### Code
 
 ```python
 # example/st_app_gsheets_using_service_account.py
@@ -111,12 +121,9 @@ client_x509_cert_url = ""
 # requirements.txt
 
 streamlit==1.22
-git+https://github.com/sfc-gh-jcarroll/st-connection-prpr.git#subdirectory=gsheets_connection
+git+https://github.com/streamlit/gsheets-connection
 pandasql  # this is for example/st_app.py only
 ```
-
-**Note on install:** Streamlit 1.22 is not yet released; you can find a compatible .whl file
-[here](https://core-previews.s3-us-west-2.amazonaws.com/pr-6457/streamlit-1.21.0-py2.py3-none-any.whl).
 
 ## Full example
 Check gsheets_connection/example directory for full example of the usage.
