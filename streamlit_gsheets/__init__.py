@@ -12,4 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from streamlit_gsheets.gsheets_connection import GSheetsConnection
+from streamlit_gsheets.gsheets_connection import GSheetsConnection  # noqa

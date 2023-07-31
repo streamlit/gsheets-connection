@@ -11,33 +11,36 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import annotations
+
 import re
-import duckdb
 from abc import ABC, abstractmethod
-from urllib.parse import urlparse
-from urllib.parse import parse_qs
 from datetime import timedelta
-from sql_metadata import Parser
-from typing import Union, Optional, List
-from pandas import DataFrame, read_csv
-from numpy import ndarray
-from gspread.client import Client as GSpreadClient
-from gspread.worksheet import Worksheet
-from gspread.spreadsheet import Spreadsheet
+from typing import List, Optional, Union, cast
+from urllib.parse import parse_qs, urlparse
+
+import duckdb
 from gspread import service_account_from_dict
-from streamlit.connections import ExperimentalBaseConnection
-from streamlit.runtime.caching import cache_data
-from validators.url import url as validate_url
-from validators.utils import ValidationFailure
-from streamlit.type_util import is_dataframe_compatible, convert_anything_to_df
+from gspread.client import Client as GSpreadClient
+from gspread.client import SpreadsheetNotFound
+from gspread.spreadsheet import Spreadsheet
+from gspread.worksheet import Worksheet
 from gspread_dataframe import get_as_dataframe, set_with_dataframe
 from gspread_formatting.dataframe import (
     format_with_dataframe as set_format_with_dataframe,
 )
+from numpy import ndarray
+from pandas import DataFrame, read_csv
+from sql_metadata import Parser
+from streamlit.connections import ExperimentalBaseConnection
+from streamlit.runtime.caching import cache_data
+from streamlit.type_util import convert_anything_to_df, is_dataframe_compatible
+from validators.url import url as validate_url
+from validators.utils import ValidationFailure
 
 
 class GSheetsClient(ABC):
-    _client: Optional[GSpreadClient] = None
+    _optional_client: Optional[GSpreadClient] = None
     _spreadsheet: Optional[str] = None
     _worksheet: Optional[str] = None
 
@@ -45,7 +48,7 @@ class GSheetsClient(ABC):
         self._spreadsheet = secrets_dict.pop("spreadsheet", None)
         self._worksheet = secrets_dict.pop("worksheet", None)
         if secrets_dict.get("type", None) == "service_account":
-            self._client = service_account_from_dict(secrets_dict)
+            self._optional_client = service_account_from_dict(secrets_dict)
 
     def set_default(
         self,
@@ -93,7 +96,7 @@ class GSheetsClient(ABC):
         worksheet: Optional[str] = None,
         data: Optional[Union[DataFrame, ndarray, List[list], List[dict]]] = None,
         folder_id: Optional[str] = None,
-    ) -> DataFrame:
+    ) -> DataFrame | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -104,7 +107,7 @@ class GSheetsClient(ABC):
         worksheet: Optional[Union[str, int, Worksheet]] = None,
         data: Optional[Union[DataFrame, ndarray, List[list], List[dict]]] = None,
         folder_id: Optional[str] = None,
-    ) -> DataFrame:
+    ) -> DataFrame | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -119,6 +122,10 @@ class GSheetsClient(ABC):
 
 
 class GSheetsServiceAccountClient(GSheetsClient):
+    def __init__(self, secrets_dict: dict):
+        super().__init__(secrets_dict)
+        self._client = cast(GSpreadClient, self._optional_client)
+
     def _open_spreadsheet(
         self,
         *,  # keyword-only arguments:
@@ -158,12 +165,12 @@ class GSheetsServiceAccountClient(GSheetsClient):
         if not folder_id and self._worksheet:
             folder_id = self._worksheet
 
-        if type(spreadsheet) is str:
+        if isinstance(spreadsheet, str):
             spreadsheet = self._open_spreadsheet(
                 spreadsheet=spreadsheet, folder_id=folder_id
             )
 
-        if type(worksheet) is str:
+        if isinstance(worksheet, str):
             return spreadsheet.worksheet(worksheet)
         if not worksheet:
             worksheet = 0
@@ -256,23 +263,47 @@ class GSheetsServiceAccountClient(GSheetsClient):
         worksheet: Optional[str] = None,
         data: Optional[Union[DataFrame, ndarray, List[list], List[dict]]] = None,
         folder_id: Optional[str] = None,
-    ) -> DataFrame:
+    ) -> DataFrame | None:
         if not spreadsheet and self._spreadsheet:
             spreadsheet = self._spreadsheet
+        else:
+            raise ValueError("Spreadsheet must be specified")
         if not folder_id and self._worksheet:
             folder_id = self._worksheet
 
-        spreadsheet = self._client.create(title=spreadsheet, folder_id=folder_id)
-        worksheet = spreadsheet.add_worksheet(title=worksheet, rows=1000, cols=26)
+        try:
+            new_spreadsheet = self._open_spreadsheet(
+                spreadsheet=spreadsheet, folder_id=folder_id
+            )
+        except SpreadsheetNotFound:
+            new_spreadsheet = self._client.create(
+                title=spreadsheet, folder_id=folder_id
+            )
 
-        if is_dataframe_compatible(data) or type(data) is ndarray:
-            if is_dataframe_compatible(data):
-                data = convert_anything_to_df(data)
-            elif type(data) is ndarray:
-                data = DataFrame.from_records(data)
-            set_with_dataframe(worksheet, data)
-            set_format_with_dataframe(worksheet, data, include_column_header=True)
-        return data
+        if is_dataframe_compatible(data):
+            return_data = convert_anything_to_df(data)
+        elif type(data) is ndarray:
+            return_data = DataFrame.from_records(data)
+        else:
+            new_spreadsheet.add_worksheet(
+                title=worksheet,
+                rows=0,
+                cols=0,
+            )
+            return None
+
+        n_rows, n_cols = return_data.shape
+
+        new_worksheet = new_spreadsheet.add_worksheet(
+            title=worksheet, rows=n_rows, cols=n_cols
+        )
+
+        set_with_dataframe(new_worksheet, return_data)
+        set_format_with_dataframe(
+            new_worksheet, return_data, include_column_header=True
+        )
+
+        return return_data
 
     def update(
         self,
@@ -281,7 +312,7 @@ class GSheetsServiceAccountClient(GSheetsClient):
         worksheet: Optional[Union[str, int, Worksheet]] = None,
         data: Optional[Union[DataFrame, ndarray, List[list], List[dict]]] = None,
         folder_id: Optional[str] = None,
-    ) -> DataFrame:
+    ) -> DataFrame | None:
         if not spreadsheet and self._spreadsheet:
             spreadsheet = self._spreadsheet
         if not folder_id and self._worksheet:
@@ -296,19 +327,21 @@ class GSheetsServiceAccountClient(GSheetsClient):
             spreadsheet=spreadsheet, folder_id=folder_id, worksheet=worksheet
         )
 
-        if is_dataframe_compatible(data) or type(data) is ndarray:
-            if is_dataframe_compatible(data):
-                data = convert_anything_to_df(data)
-            elif type(data) is ndarray:
-                data = DataFrame.from_records(data)
-            if worksheet:
-                self.clear(
-                    spreadsheet=spreadsheet,
-                    folder_id=folder_id,
-                    worksheet=worksheet,
-                )
-            set_with_dataframe(worksheet, data)
-            set_format_with_dataframe(worksheet, data, include_column_header=True)
+        if is_dataframe_compatible(data):
+            data = convert_anything_to_df(data)
+        elif type(data) is ndarray:
+            data = DataFrame.from_records(data)
+        else:
+            return None
+
+        if worksheet:
+            self.clear(
+                spreadsheet=spreadsheet,
+                folder_id=folder_id,
+                worksheet=worksheet,
+            )
+        set_with_dataframe(worksheet, data)
+        set_format_with_dataframe(worksheet, data, include_column_header=True)
         return data
 
     def clear(
@@ -332,29 +365,29 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
         self,
         *,  # keyword-only arguments:
         spreadsheet: str,
-        worksheet: Optional[str] = None,
+        worksheet: str | int | None = None,
     ) -> str:
         validation_failure = ValidationFailure(
             "spreadsheet validation failure",
             args={"spreadsheet": spreadsheet},
         )
         try:
-            if validate_url(spreadsheet):
+            if validate_url(spreadsheet):  # type: ignore
                 r = re.compile(r"\/d\/.+?(?=\/)")
                 found_ids = r.findall(spreadsheet)
                 if len(found_ids) < 1:
                     raise validation_failure
                 key = found_ids[0][3:]
                 parsed_url = urlparse(spreadsheet)
-                parsed_qs = parse_qs(parsed_url.query)
+                parsed_qs = parse_qs(parsed_url.query)  # type: ignore
                 frag = parsed_url.fragment
                 gid_re = re.compile(r"gid=\w+")
-                found_gids = gid_re.findall(frag)
+                found_gids = gid_re.findall(frag)  # type: ignore
                 final_gid = None
                 if len(found_gids) > 0:
                     final_gid = found_gids[0][4:]
-                elif parsed_qs.get("gid", []) and len(parsed_qs.get("gid", [])) > 0:
-                    final_gid = parsed_qs.get("gid", [""])[0]
+                elif parsed_qs.get("gid", []) and len(parsed_qs.get("gid", [])) > 0:  # type: ignore
+                    final_gid = parsed_qs.get("gid", [""])[0]  # type: ignore
                 if worksheet:
                     final_gid = worksheet
                 url = f"https://docs.google.com/spreadsheet/ccc?key={key}&output=csv"
@@ -378,12 +411,13 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
         worksheet: Optional[Union[int, str]] = None,
         ttl: Optional[Union[int, timedelta, None]] = 3600,
         max_entries: Optional[Union[int, None]] = None,
-        evaluate_formulas: bool = True,
-        folder_id: Optional[str] = None,
         **options,
     ) -> DataFrame:
-        if not spreadsheet and self._spreadsheet:
-            spreadsheet = self._spreadsheet
+        spreadsheet = spreadsheet or self._spreadsheet
+
+        if not spreadsheet:
+            raise ValueError("Spreadsheet must be specified")
+
         if not worksheet and self._worksheet:
             worksheet = self._worksheet
         url = self._get_download_as_csv_url(
@@ -393,6 +427,9 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
         @cache_data(ttl=ttl, max_entries=max_entries)
         def _get_as_dataframe(url: str, **options) -> DataFrame:
             return read_csv(url, **options)
+
+        for arg in ["evaluate_formulas", "folder_id"]:
+            options.pop(arg, None)
 
         return _get_as_dataframe(url, **options)
 
@@ -404,14 +441,14 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
         worksheet: Optional[Union[int, str]] = None,
         ttl: Optional[Union[int, timedelta, None]] = 3600,
         max_entries: Optional[Union[int, None]] = None,
-        evaluate_formulas: bool = True,
-        folder_id: Optional[str] = None,
         **options,
     ) -> DataFrame:
-        if not spreadsheet and self._spreadsheet:
-            spreadsheet = self._spreadsheet
-        if not worksheet and self._worksheet:
-            worksheet = self._worksheet
+        spreadsheet = spreadsheet or self._spreadsheet
+        worksheet = worksheet or self._worksheet
+
+        if not spreadsheet:
+            raise ValueError("Spreadsheet must be specified")
+
         url = self._get_download_as_csv_url(
             spreadsheet=spreadsheet, worksheet=worksheet
         )
@@ -425,6 +462,9 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
                 in_memory_db.sql(create_table_sql)
                 _ = df
             return in_memory_db.sql(query=sql).to_df()
+
+        for arg in ["evaluate_formulas", "folder_id"]:
+            options.pop(arg, None)
 
         return _query(sql, url, **options)
 
@@ -610,7 +650,7 @@ class GSheetsConnection(ExperimentalBaseConnection[GSheetsClient], GSheetsClient
         worksheet: Optional[str] = None,
         data: Optional[Union[DataFrame, ndarray, List[list], List[dict]]] = None,
         folder_id: Optional[str] = None,
-    ) -> DataFrame:
+    ) -> DataFrame | None:
         """Creates Google Worksheet and initializes it with provided data.
 
         Parameters
@@ -644,7 +684,7 @@ class GSheetsConnection(ExperimentalBaseConnection[GSheetsClient], GSheetsClient
         worksheet: Optional[Union[str, int, Worksheet]] = None,
         data: Optional[Union[DataFrame, ndarray, List[list], List[dict]]] = None,
         folder_id: Optional[str] = None,
-    ) -> DataFrame:
+    ) -> DataFrame | None:
         """Updates Google Worksheet with provided data.
 
         Parameters

@@ -8,6 +8,7 @@ st.write("#### 1. Read public Google Worksheet as Pandas")
 
 with st.echo():
     import streamlit as st
+
     from streamlit_gsheets import GSheetsConnection
 
     conn = st.experimental_connection("gsheets", type=GSheetsConnection)
@@ -30,11 +31,10 @@ st.warning(
 
 with st.echo():
     import streamlit as st
+
     from streamlit_gsheets import GSheetsConnection
 
     conn = st.experimental_connection("gsheets", type=GSheetsConnection)
 
-    df = conn.query(
-        'select births from "Example 2" limit 10', spreadsheet=url, usecols=[0, 1]
-    )
+    df = conn.query('select births from "Example 2" limit 10', spreadsheet=url)
     st.dataframe(df)
