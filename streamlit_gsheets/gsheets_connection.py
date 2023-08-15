@@ -36,7 +36,7 @@ from streamlit.connections import ExperimentalBaseConnection
 from streamlit.runtime.caching import cache_data
 from streamlit.type_util import convert_anything_to_df, is_dataframe_compatible
 from validators.url import url as validate_url
-from validators.utils import ValidationFailure
+from validators.utils import ValidationError
 
 
 class GSheetsClient(ABC):
@@ -144,10 +144,10 @@ class GSheetsServiceAccountClient(GSheetsClient):
             if validate_url(spreadsheet):
                 return self._client.open_by_url(url=spreadsheet)
             else:
-                raise ValidationFailure(
+                raise ValidationError(
                     "spreadsheet is not URL", args={"spreadsheet": spreadsheet}
                 )
-        except ValidationFailure:
+        except ValidationError:
             return self._client.open(title=spreadsheet, folder_id=folder_id)
 
     def _select_worksheet(
@@ -367,7 +367,7 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
         spreadsheet: str,
         worksheet: str | int | None = None,
     ) -> str:
-        validation_failure = ValidationFailure(
+        validation_failure = ValidationError(
             "spreadsheet validation failure",
             args={"spreadsheet": spreadsheet},
         )
@@ -396,7 +396,7 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
                 return url
             else:
                 raise validation_failure
-        except (ValidationFailure, TypeError):
+        except (ValidationError, TypeError):
             url = (
                 f"https://docs.google.com/spreadsheet/ccc?key={spreadsheet}&output=csv"
             )
