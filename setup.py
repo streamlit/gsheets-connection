@@ -10,7 +10,7 @@ INSTALL_REQUIRES = [
     "gspread-pandas>=3.2.2",
     "gspread-dataframe>=3.3.0",
     "gspread-formatting>=1.1.2",
-    "duckdb>=0.7.1",
+    "duckdb>=0.8.2.dev5002",
     "sql-metadata>=2.7.0",
     "validators>=0.20.0",
 ]
