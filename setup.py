@@ -12,7 +12,7 @@ INSTALL_REQUIRES = [
     "gspread-formatting>=1.1.2",
     "duckdb>=0.7.1",
     "sql-metadata>=2.7.0",
-    "validators>=0.20.0",
+    "validators==0.20.0",
 ]
 
 
