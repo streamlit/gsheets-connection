@@ -318,7 +318,7 @@ class GSheetsServiceAccountClient(GSheetsClient):
         if not folder_id and self._worksheet:
             folder_id = self._worksheet
 
-        if type(spreadsheet) is str:
+        if isinstance(spreadsheet, str):
             spreadsheet = self._open_spreadsheet(
                 spreadsheet=spreadsheet, folder_id=folder_id
             )
