@@ -36,11 +36,7 @@ from streamlit.connections import ExperimentalBaseConnection
 from streamlit.runtime.caching import cache_data
 from streamlit.type_util import convert_anything_to_df, is_dataframe_compatible
 from validators.url import url as validate_url
-
-try:
-    from validators.utils import ValidationError as ValidationFailure
-except ImportError:
-    from validators.utils import ValidationFailure
+from validators.utils import ValidationError as ValidationFailure
 
 
 class GSheetsClient(ABC):
