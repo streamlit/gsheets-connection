@@ -8,6 +8,8 @@ GSheets Connection works in two modes:
 - CRUD operations support mode, with Authentication using Service Account. In order to use Service Account mode you need to enable Google Drive and Google Sheets API in [Google Developers Console](https://console.developers.google.com/).
   Follow **Initial setup for CRUD mode** section in order to authenticate your Streamlit app first.
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://st-gsheets.streamlit.app/)
+
 ## Install
 
 ```sh
