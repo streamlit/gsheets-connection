@@ -4,14 +4,14 @@ Connect to public or private Google Sheets from your Streamlit app. Powered by `
 
 GSheets Connection works in two modes:
 
-* in Read Only mode, using publicly shared Spreadsheet URLs (Read Only mode)
-* CRUD operations support mode, with Authentication using Service Account. In order to use Service Account mode you need to enable Google Drive and Google Sheets API in [Google Developers Console](https://console.developers.google.com/).
-Follow **Initial setup for CRUD mode** section in order to authenticate your Streamlit app first.
+- in Read Only mode, using publicly shared Spreadsheet URLs (Read Only mode)
+- CRUD operations support mode, with Authentication using Service Account. In order to use Service Account mode you need to enable Google Drive and Google Sheets API in [Google Developers Console](https://console.developers.google.com/).
+  Follow **Initial setup for CRUD mode** section in order to authenticate your Streamlit app first.
 
 ## Install
 
 ```sh
-pip install streamlit git+https://github.com/streamlit/gsheets-connection
+pip install st-gsheets-connection
 ```
 
 ## Minimal example: publicly shared spreadsheet (read-only)
@@ -34,22 +34,23 @@ st.dataframe(data)
 
 ### Initial setup for private spreadsheet and/or CRUD mode
 
-1. Setup `.streamlit/secrets.toml` inside your Streamlit app root directory,  
-check out [Secret management documentation](https://docs.streamlit.io/streamlit-community-cloud/get-started/deploy-an-app/connect-to-data-sources/secrets-management) for references.
+1. Setup `.streamlit/secrets.toml` inside your Streamlit app root directory,
+   check out [Secret management documentation](https://docs.streamlit.io/streamlit-community-cloud/get-started/deploy-an-app/connect-to-data-sources/secrets-management) for references.
 2. [Enable API Access for a Project](https://docs.gspread.org/en/v5.7.1/oauth2.html#enable-api-access-for-a-project)
-    * Head to [Google Developers Console](https://console.developers.google.com/) and create a new project (or select the one you already have).
-    * In the box labeled “Search for APIs and Services”, search for “Google Drive API” and enable it.
-    * In the box labeled “Search for APIs and Services”, search for “Google Sheets API” and enable it.
+   - Head to [Google Developers Console](https://console.developers.google.com/) and create a new project (or select the one you already have).
+   - In the box labeled “Search for APIs and Services”, search for “Google Drive API” and enable it.
+   - In the box labeled “Search for APIs and Services”, search for “Google Sheets API” and enable it.
 3. [Using Service Account](https://docs.gspread.org/en/v5.7.1/oauth2.html#for-bots-using-service-account)
-    * Enable API Access for a Project if you haven’t done it yet.
-    * Go to “APIs & Services > Credentials” and choose “Create credentials > Service account key”.
-    * Fill out the form
-    * Click “Create” and “Done”.
-    * Press “Manage service accounts” above Service Accounts.
-    * Press on ⋮ near recently created service account and select “Manage keys” and then click on “ADD KEY > Create new key”.
-    * Select JSON key type and press “Create”.
+   - Enable API Access for a Project if you haven’t done it yet.
+   - Go to “APIs & Services > Credentials” and choose “Create credentials > Service account key”.
+   - Fill out the form
+   - Click “Create” and “Done”.
+   - Press “Manage service accounts” above Service Accounts.
+   - Press on ⋮ near recently created service account and select “Manage keys” and then click on “ADD KEY > Create new key”.
+   - Select JSON key type and press “Create”.
 
 You will automatically download a JSON file with credentials. It may look like this:
+
 ```
 {
     "type": "service_account",
@@ -61,10 +62,13 @@ You will automatically download a JSON file with credentials. It may look like t
     ...
 }
 ```
+
 Remember the path to the downloaded credentials file. Also, in the next step you’ll need the value of client_email from this file.
-* **:red[Very important!]** Go to your spreadsheet and share it with a client_email from the step above. Just like you do with any other Google account. If you don’t do this, you’ll get a `gspread.exceptions.SpreadsheetNotFound` exception when trying to access this spreadsheet from your application or a script.
+
+- **:red[Very important!]** Go to your spreadsheet and share it with a client_email from the step above. Just like you do with any other Google account. If you don’t do this, you’ll get a `gspread.exceptions.SpreadsheetNotFound` exception when trying to access this spreadsheet from your application or a script.
 
 4. Inside `streamlit/secrets.toml` place `service_account` configuration from downloaded JSON file, in the following format (where `gsheets` is your `st.connection` name):
+
 ```
 # .streamlit/secrets.toml
 
@@ -126,12 +130,15 @@ pandasql  # this is for example/st_app.py only
 ```
 
 ## Full example
+
 Check gsheets_connection/example directory for full example of the usage.
 
 ## Q&A
-* > Does this work with a public spreadsheet without the authentication details? Or only a private spreadsheet?
 
-   GSheets Connection works in two modes:
-  * in Read Only mode, using publicly shared Spreadsheet URLs (Read Only mode)
-  * CRUD operations support mode, with Authentication using Service Account. In order to use Service Account mode you need to enable Google Drive and Google Sheets API in [Google Developers Console](https://console.developers.google.com/).
-  Follow **Initial setup for CRUD mode** section in order to authenticate your Streamlit app first.
+- > Does this work with a public spreadsheet without the authentication details? Or only a private spreadsheet?
+
+  GSheets Connection works in two modes:
+
+  - in Read Only mode, using publicly shared Spreadsheet URLs (Read Only mode)
+  - CRUD operations support mode, with Authentication using Service Account. In order to use Service Account mode you need to enable Google Drive and Google Sheets API in [Google Developers Console](https://console.developers.google.com/).
+    Follow **Initial setup for CRUD mode** section in order to authenticate your Streamlit app first.
