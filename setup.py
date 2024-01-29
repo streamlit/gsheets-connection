@@ -1,12 +1,12 @@
 import setuptools
 
-VERSION = "0.0.3"  # PEP-440
+VERSION = "0.0.4"  # PEP-440
 
 NAME = "st-gsheets-connection"
 
 INSTALL_REQUIRES = [
     "streamlit>=1.22.0",
-    "gspread>=5.8.0",
+    "gspread>=5.8.0, <6",
     "gspread-pandas>=3.2.2",
     "gspread-dataframe>=3.3.0",
     "gspread-formatting>=1.1.2",
