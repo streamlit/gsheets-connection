@@ -1,6 +1,6 @@
 import setuptools
 
-VERSION = "0.0.3"  # PEP-440
+VERSION = "0.0.4"  # PEP-440
 
 NAME = "st-gsheets-connection"
 
