@@ -1,0 +1,9 @@
+streamlit
+gspread
+gspread-pandas
+gspread-dataframe
+gspread-formatting
+pandas
+duckdb
+sql-metadata
+validators
