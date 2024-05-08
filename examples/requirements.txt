@@ -1,3 +1,9 @@
-streamlit>=1.22.0
-pandasql  # this is for examples/ only
-st-gsheets-connection
+streamlit
+gspread
+gspread-pandas
+gspread-dataframe
+gspread-formatting
+pandas
+duckdb
+sql-metadata
+validators
