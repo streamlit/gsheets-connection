@@ -34,7 +34,7 @@ from pandas import DataFrame, read_csv
 from sql_metadata import Parser
 from streamlit.connections import ExperimentalBaseConnection
 from streamlit.runtime.caching import cache_data
-from streamlit.type_util import convert_anything_to_df, is_dataframe_compatible
+from streamlit.dataframe_util import convert_anything_to_pandas_df, is_dataframe_like
 from validators.url import url as validate_url
 from validators.utils import ValidationError
 
