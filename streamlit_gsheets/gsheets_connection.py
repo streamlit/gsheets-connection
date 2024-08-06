@@ -280,8 +280,8 @@ class GSheetsServiceAccountClient(GSheetsClient):
                 title=spreadsheet, folder_id=folder_id
             )
 
-        if is_dataframe_compatible(data):
-            return_data = convert_anything_to_df(data)
+        if is_dataframe_like(data):
+            return_data = convert_anything_to_pandas_df(data)
         elif type(data) is ndarray:
             return_data = DataFrame.from_records(data)
         else:
@@ -327,8 +327,8 @@ class GSheetsServiceAccountClient(GSheetsClient):
             spreadsheet=spreadsheet, folder_id=folder_id, worksheet=worksheet
         )
 
-        if is_dataframe_compatible(data):
-            data = convert_anything_to_df(data)
+        if is_dataframe_like(data):
+            data = convert_anything_to_pandas_df(data)
         elif type(data) is ndarray:
             data = DataFrame.from_records(data)
         else:
