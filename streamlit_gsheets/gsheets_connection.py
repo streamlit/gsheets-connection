@@ -34,7 +34,7 @@ from pandas import DataFrame, read_csv
 from sql_metadata import Parser
 from streamlit.connections import ExperimentalBaseConnection
 from streamlit.runtime.caching import cache_data
-from streamlit.type_util import convert_anything_to_df, is_dataframe_compatible
+from streamlit.dataframe_util import convert_anything_to_pandas_df, is_dataframe_like
 from validators.url import url as validate_url
 from validators.utils import ValidationError
 
@@ -280,8 +280,8 @@ class GSheetsServiceAccountClient(GSheetsClient):
                 title=spreadsheet, folder_id=folder_id
             )
 
-        if is_dataframe_compatible(data):
-            return_data = convert_anything_to_df(data)
+        if is_dataframe_like(data):
+            return_data = convert_anything_to_pandas_df(data)
         elif type(data) is ndarray:
             return_data = DataFrame.from_records(data)
         else:
@@ -327,8 +327,8 @@ class GSheetsServiceAccountClient(GSheetsClient):
             spreadsheet=spreadsheet, folder_id=folder_id, worksheet=worksheet
         )
 
-        if is_dataframe_compatible(data):
-            data = convert_anything_to_df(data)
+        if is_dataframe_like(data):
+            data = convert_anything_to_pandas_df(data)
         elif type(data) is ndarray:
             data = DataFrame.from_records(data)
         else:

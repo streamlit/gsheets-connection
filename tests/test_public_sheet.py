@@ -21,7 +21,7 @@ def expected_df() -> pd.DataFrame:
 def test_read_public_sheet(expected_df: pd.DataFrame):
     url = "https://docs.google.com/spreadsheets/d/1JDy9md2VZPz4JbYtRPJLs81_3jUK47nx6GYQjgU8qNY/edit"
 
-    conn = st.experimental_connection("connection_name", type=GSheetsConnection)
+    conn = st.connection("connection_name", type=GSheetsConnection)
 
     df = conn.read(spreadsheet=url, usecols=[0, 1])
 
@@ -31,7 +31,7 @@ def test_read_public_sheet(expected_df: pd.DataFrame):
 def test_query_public_sheet():
     url = "https://docs.google.com/spreadsheets/d/1JDy9md2VZPz4JbYtRPJLs81_3jUK47nx6GYQjgU8qNY/edit"
 
-    conn = st.experimental_connection("connection_name", type=GSheetsConnection)
+    conn = st.connection("connection_name", type=GSheetsConnection)
 
     df = conn.query("select date from my_table where births = 265775", spreadsheet=url)
 
@@ -45,7 +45,7 @@ def test_query_worksheet_public_sheet():
         1585633377  # Example 2, note that this is the gid, not the worksheet name
     )
 
-    conn = st.experimental_connection("connection_name", type=GSheetsConnection)
+    conn = st.connection("connection_name", type=GSheetsConnection)
 
     df = conn.query(
         "select date from my_table where births = 1000000",
@@ -65,7 +65,7 @@ spreadsheet = "https://docs.google.com/spreadsheets/d/1JDy9md2VZPz4JbYtRPJLs81_3
 
 @patch("builtins.open", mock_open(read_data=secrets_contents))
 def test_secrets_contents(expected_df):
-    conn = st.experimental_connection("test_connection_name", type=GSheetsConnection)
+    conn = st.connection("test_connection_name", type=GSheetsConnection)
 
     df = conn.read()
 
@@ -73,7 +73,7 @@ def test_secrets_contents(expected_df):
 
 
 def test_no_secrets_contents():
-    conn = st.experimental_connection("other_connection_name", type=GSheetsConnection)
+    conn = st.connection("other_connection_name", type=GSheetsConnection)
 
     with pytest.raises(ValueError):
         conn.read()
