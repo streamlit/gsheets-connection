@@ -9,7 +9,7 @@ with st.echo():
 
     from streamlit_gsheets import GSheetsConnection
 
-    conn = st.experimental_connection("gsheets", type=GSheetsConnection)
+    conn = st.connection("gsheets", type=GSheetsConnection)
     st.write(conn)
     st.help(conn)
 
@@ -105,7 +105,7 @@ with st.echo():
     from streamlit_gsheets import GSheetsConnection
 
     # Create GSheets connection
-    conn = st.experimental_connection("gsheets", type=GSheetsConnection)
+    conn = st.connection("gsheets", type=GSheetsConnection)
 
     # Demo Births DataFrame
     df = psql.load_births()
@@ -118,7 +118,7 @@ with st.echo():
             data=df,
         )
         st.cache_data.clear()
-        st.experimental_rerun()
+        st.rerun()
 
     # Display our Spreadsheet as st.dataframe
     st.dataframe(df.head(10))
@@ -136,7 +136,7 @@ with st.echo():
     from streamlit_gsheets import GSheetsConnection
 
     # Create GSheets connection
-    conn = st.experimental_connection("gsheets", type=GSheetsConnection)
+    conn = st.connection("gsheets", type=GSheetsConnection)
 
     # Read Google WorkSheet as DataFrame
     df = conn.read(
@@ -157,7 +157,7 @@ with st.echo():
     from streamlit_gsheets import GSheetsConnection
 
     # Create GSheets connection
-    conn = st.experimental_connection("gsheets", type=GSheetsConnection)
+    conn = st.connection("gsheets", type=GSheetsConnection)
 
     # Demo Meat DataFrame
     df = psql.load_meat()
@@ -170,7 +170,7 @@ with st.echo():
             data=df,
         )
         st.cache_data.clear()
-        st.experimental_rerun()
+        st.rerun()
 
     # Display our Spreadsheet as st.dataframe
     st.dataframe(df.head(10))
@@ -188,7 +188,7 @@ with st.echo():
     from streamlit_gsheets import GSheetsConnection
 
     # Create GSheets connection
-    conn = st.experimental_connection("gsheets", type=GSheetsConnection)
+    conn = st.connection("gsheets", type=GSheetsConnection)
 
     # make sure worksheet name is in double quota "", in our case it's "Example 1"
     # DuckDB SQL dialect is supported
@@ -206,7 +206,7 @@ with st.echo():
     from streamlit_gsheets import GSheetsConnection
 
     # Create GSheets connection
-    conn = st.experimental_connection("gsheets", type=GSheetsConnection)
+    conn = st.connection("gsheets", type=GSheetsConnection)
 
     # click button to update worksheet
     # This is behind a button to avoid exceeding Google API Quota
@@ -214,7 +214,7 @@ with st.echo():
         conn.clear(worksheet="Example 1")
         st.info("Worksheet Example 1 Cleared!")
         st.cache_data.clear()
-        st.experimental_rerun()
+        st.rerun()
 
     # click button to delete worksheet using the underlying gspread API
     # This is behind a button to avoid exceeding Google API Quota
@@ -223,4 +223,4 @@ with st.echo():
         worksheet = spreadsheet.worksheet("Example 1")
         spreadsheet.del_worksheet(worksheet)
         st.cache_data.clear()
-        st.experimental_rerun()
+        st.rerun()

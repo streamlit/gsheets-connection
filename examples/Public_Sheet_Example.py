@@ -11,7 +11,7 @@ with st.echo():
 
     from streamlit_gsheets import GSheetsConnection
 
-    conn = st.experimental_connection("gsheets", type=GSheetsConnection)
+    conn = st.connection("gsheets", type=GSheetsConnection)
 
     df = conn.read(spreadsheet=url, usecols=[0, 1])
     st.dataframe(df)
@@ -34,7 +34,7 @@ with st.echo():
 
     from streamlit_gsheets import GSheetsConnection
 
-    conn = st.experimental_connection("gsheets", type=GSheetsConnection)
+    conn = st.connection("gsheets", type=GSheetsConnection)
 
     df = conn.query('select births from "Example 2" limit 10', spreadsheet=url)
     st.dataframe(df)
