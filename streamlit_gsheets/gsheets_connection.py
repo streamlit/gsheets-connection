@@ -209,6 +209,7 @@ class GSheetsServiceAccountClient(GSheetsClient):
         self,
         sql: str,
         *,  # keyword-only arguments:
+        worksheet: Optional[Union[int, str]] = None,
         spreadsheet: Optional[str] = None,
         ttl: Optional[Union[int, timedelta, None]] = 3600,
         max_entries: Optional[Union[int, None]] = None,
@@ -216,9 +217,11 @@ class GSheetsServiceAccountClient(GSheetsClient):
         folder_id: Optional[str] = None,
         **options,
     ) -> DataFrame:
-        if not spreadsheet and self._spreadsheet:
+        if worksheet is None and self._worksheet:
+            worksheet = self._worksheet
+        if spreadsheet is None and self._spreadsheet:
             spreadsheet = self._spreadsheet
-        if not folder_id and self._worksheet:
+        if folder_id is None and self._worksheet:
             folder_id = self._worksheet
 
         @cache_data(ttl=ttl, max_entries=max_entries)
@@ -435,7 +438,10 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
         return _query(sql, url, **options)
 
     def create(self, *args, **kwargs) -> DataFrame:  # noqa: ARG002
-        raise UnsupportedOperationError("Use Service Account authentication to enable CRUD methods on your Spreadsheets.")
+        raise UnsupportedOperationError(
+            "Public Spreadsheet cannot be created, "
+            "use Service Account authentication to enable CRUD methods on your Spreadsheets."
+        )
 
     def update(self, *args, **kwargs) -> DataFrame:  # noqa: ARG002
         raise UnsupportedOperationError(
