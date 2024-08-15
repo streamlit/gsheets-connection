@@ -36,7 +36,6 @@ from streamlit.connections import ExperimentalBaseConnection
 from streamlit.runtime.caching import cache_data
 from streamlit.dataframe_util import convert_anything_to_pandas_df, is_dataframe_like
 from validators.url import url as validate_url
-from validators.utils import ValidationError
 
 
 class GSheetsClient(ABC):
@@ -144,9 +143,7 @@ class GSheetsServiceAccountClient(GSheetsClient):
             if validate_url(spreadsheet):
                 return self._client.open_by_url(url=spreadsheet)
             else:
-                raise ValidationError(
-                    "spreadsheet is not URL", arg_dict={"spreadsheet": spreadsheet}
-                )
+                raise ValidationError("spreadsheet is not URL", arg_dict={"spreadsheet": spreadsheet})
         except ValidationError:
             return self._client.open(title=spreadsheet, folder_id=folder_id)
 
@@ -166,9 +163,7 @@ class GSheetsServiceAccountClient(GSheetsClient):
             folder_id = self._worksheet
 
         if isinstance(spreadsheet, str):
-            spreadsheet = self._open_spreadsheet(
-                spreadsheet=spreadsheet, folder_id=folder_id
-            )
+            spreadsheet = self._open_spreadsheet(spreadsheet=spreadsheet, folder_id=folder_id)
 
         if isinstance(worksheet, str):
             return spreadsheet.worksheet(worksheet)
@@ -193,13 +188,9 @@ class GSheetsServiceAccountClient(GSheetsClient):
             folder_id = self._worksheet
 
         @cache_data(ttl=ttl, max_entries=max_entries)
-        def _get_as_dataframe(
-            spreadsheet, folder_id, worksheet, evaluate_formulas, **options
-        ):
+        def _get_as_dataframe(spreadsheet, folder_id, worksheet, evaluate_formulas, **options):
             return get_as_dataframe(
-                worksheet=self._select_worksheet(
-                    spreadsheet=spreadsheet, folder_id=folder_id, worksheet=worksheet
-                ),
+                worksheet=self._select_worksheet(spreadsheet=spreadsheet, folder_id=folder_id, worksheet=worksheet),
                 evaluate_formulas=evaluate_formulas,
                 **options,
             )
@@ -235,9 +226,7 @@ class GSheetsServiceAccountClient(GSheetsClient):
             for worksheet in Parser(sql).tables:
                 df = DataFrame()
                 create_table_sql = f'CREATE TABLE "{worksheet}" AS SELECT * FROM df'
-                if not self._select_worksheet(
-                    spreadsheet=spreadsheet, folder_id=folder_id, worksheet=worksheet
-                ):
+                if not self._select_worksheet(spreadsheet=spreadsheet, folder_id=folder_id, worksheet=worksheet):
                     in_memory_db.sql(create_table_sql)
                     _ = df
                     continue
@@ -272,13 +261,9 @@ class GSheetsServiceAccountClient(GSheetsClient):
             folder_id = self._worksheet
 
         try:
-            new_spreadsheet = self._open_spreadsheet(
-                spreadsheet=spreadsheet, folder_id=folder_id
-            )
+            new_spreadsheet = self._open_spreadsheet(spreadsheet=spreadsheet, folder_id=folder_id)
         except SpreadsheetNotFound:
-            new_spreadsheet = self._client.create(
-                title=spreadsheet, folder_id=folder_id
-            )
+            new_spreadsheet = self._client.create(title=spreadsheet, folder_id=folder_id)
 
         if is_dataframe_like(data):
             return_data = convert_anything_to_pandas_df(data)
@@ -294,14 +279,10 @@ class GSheetsServiceAccountClient(GSheetsClient):
 
         n_rows, n_cols = return_data.shape
 
-        new_worksheet = new_spreadsheet.add_worksheet(
-            title=worksheet, rows=n_rows, cols=n_cols
-        )
+        new_worksheet = new_spreadsheet.add_worksheet(title=worksheet, rows=n_rows, cols=n_cols)
 
         set_with_dataframe(new_worksheet, return_data)
-        set_format_with_dataframe(
-            new_worksheet, return_data, include_column_header=True
-        )
+        set_format_with_dataframe(new_worksheet, return_data, include_column_header=True)
 
         return return_data
 
@@ -319,13 +300,9 @@ class GSheetsServiceAccountClient(GSheetsClient):
             folder_id = self._worksheet
 
         if isinstance(spreadsheet, str):
-            spreadsheet = self._open_spreadsheet(
-                spreadsheet=spreadsheet, folder_id=folder_id
-            )
+            spreadsheet = self._open_spreadsheet(spreadsheet=spreadsheet, folder_id=folder_id)
 
-        worksheet = self._select_worksheet(
-            spreadsheet=spreadsheet, folder_id=folder_id, worksheet=worksheet
-        )
+        worksheet = self._select_worksheet(spreadsheet=spreadsheet, folder_id=folder_id, worksheet=worksheet)
 
         if is_dataframe_like(data):
             data = convert_anything_to_pandas_df(data)
@@ -351,9 +328,7 @@ class GSheetsServiceAccountClient(GSheetsClient):
         worksheet: Optional[Union[str, int, Worksheet]] = None,
         folder_id: Optional[str] = None,
     ) -> dict:
-        return self._select_worksheet(
-            spreadsheet=spreadsheet, worksheet=worksheet, folder_id=folder_id
-        ).clear()
+        return self._select_worksheet(spreadsheet=spreadsheet, worksheet=worksheet, folder_id=folder_id).clear()
 
 
 class UnsupportedOperationException(Exception):
@@ -367,10 +342,7 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
         spreadsheet: str,
         worksheet: str | int | None = None,
     ) -> str:
-        validation_failure = ValidationError(
-            "spreadsheet validation failure",
-            arg_dict={"spreadsheet": spreadsheet},
-        )
+        validation_failure = ValueError(f"spreadsheet validation failure for {spreadsheet}")
         try:
             if validate_url(spreadsheet):  # type: ignore
                 r = re.compile(r"\/d\/.+?(?=\/)")
@@ -396,10 +368,8 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
                 return url
             else:
                 raise validation_failure
-        except (ValidationError, TypeError):
-            url = (
-                f"https://docs.google.com/spreadsheet/ccc?key={spreadsheet}&output=csv"
-            )
+        except (ValueError, TypeError):
+            url = f"https://docs.google.com/spreadsheet/ccc?key={spreadsheet}&output=csv"
             if worksheet:
                 return f"{url}&gid={worksheet}"
             return url
@@ -420,9 +390,7 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
 
         if not worksheet and self._worksheet:
             worksheet = self._worksheet
-        url = self._get_download_as_csv_url(
-            spreadsheet=spreadsheet, worksheet=worksheet
-        )
+        url = self._get_download_as_csv_url(spreadsheet=spreadsheet, worksheet=worksheet)
 
         @cache_data(ttl=ttl, max_entries=max_entries)
         def _get_as_dataframe(url: str, **options) -> DataFrame:
@@ -449,9 +417,7 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
         if not spreadsheet:
             raise ValueError("Spreadsheet must be specified")
 
-        url = self._get_download_as_csv_url(
-            spreadsheet=spreadsheet, worksheet=worksheet
-        )
+        url = self._get_download_as_csv_url(spreadsheet=spreadsheet, worksheet=worksheet)
 
         @cache_data(ttl=ttl, max_entries=max_entries)
         def _query(sql: str, url: str, **options):
@@ -673,9 +639,7 @@ class GSheetsConnection(ExperimentalBaseConnection[GSheetsClient], GSheetsClient
         -----------
         df: pandas.DataFrame.
         """
-        return self.client.create(
-            spreadsheet=spreadsheet, worksheet=worksheet, data=data, folder_id=folder_id
-        )
+        return self.client.create(spreadsheet=spreadsheet, worksheet=worksheet, data=data, folder_id=folder_id)
 
     def update(
         self,
@@ -707,9 +671,7 @@ class GSheetsConnection(ExperimentalBaseConnection[GSheetsClient], GSheetsClient
         -----------
         df: pandas.DataFrame.
         """
-        return self.client.update(
-            spreadsheet=spreadsheet, worksheet=worksheet, data=data, folder_id=folder_id
-        )
+        return self.client.update(spreadsheet=spreadsheet, worksheet=worksheet, data=data, folder_id=folder_id)
 
     def clear(
         self,
@@ -738,9 +700,7 @@ class GSheetsConnection(ExperimentalBaseConnection[GSheetsClient], GSheetsClient
         response: dict
             Google API GSpread clear response.
         """
-        return self.client.clear(
-            spreadsheet=spreadsheet, worksheet=worksheet, folder_id=folder_id
-        )
+        return self.client.clear(spreadsheet=spreadsheet, worksheet=worksheet, folder_id=folder_id)
 
     def set_default(
         self,
