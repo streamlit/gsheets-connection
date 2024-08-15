@@ -1,16 +1,17 @@
+from pathlib import Path
+
 import setuptools
 
-VERSION = "0.0.4"  # PEP-440
+VERSION = "0.1.0"  # PEP-440
 
 NAME = "st-gsheets-connection"
 
 INSTALL_REQUIRES = [
-    "streamlit>=1.22.0",
+    "streamlit>=1.32.0",
     "gspread>=5.8.0, <6",
     "gspread-pandas>=3.2.2",
     "gspread-dataframe>=3.3.0",
     "gspread-formatting>=1.1.2",
-    "pandas>=1.3.0, <2",
     "duckdb>=0.8.1",
     "sql-metadata>=2.7.0",
     "validators>=0.22.0",
@@ -42,6 +43,6 @@ setuptools.setup(
     # Requirements
     install_requires=INSTALL_REQUIRES,
     packages=["streamlit_gsheets"],
-    long_description=open("README.md").read(),
+    long_description=Path("README.md").read_text(),
     long_description_content_type="text/markdown",
 )
