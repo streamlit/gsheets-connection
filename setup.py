@@ -7,12 +7,11 @@ VERSION = "0.0.4"  # PEP-440
 NAME = "st-gsheets-connection"
 
 INSTALL_REQUIRES = [
-    "streamlit>=1.22.0",
+    "streamlit>=1.32.0",
     "gspread>=5.8.0, <6",
     "gspread-pandas>=3.2.2",
     "gspread-dataframe>=3.3.0",
     "gspread-formatting>=1.1.2",
-    "pandas>=1.3.0, <2",
     "duckdb>=0.8.1",
     "sql-metadata>=2.7.0",
     "validators>=0.22.0",
