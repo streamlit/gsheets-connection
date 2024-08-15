@@ -36,7 +36,7 @@ Project](https://docs.gspread.org/en/v5.7.1/oauth2.html#enable-api-access-for-a-
       and enable it.
 3. [Using Service
    Account](https://docs.gspread.org/en/v5.7.1/oauth2.html#for-bots-using-service-account)
-    * Enable API Access for a Project if you haven’t done it yet.
+    * Enable API Access for a Project if you haven't done it yet.
     * Go to “APIs & Services > Credentials” and choose “Create credentials > Service
       account key”.
     * Fill out the form
@@ -58,12 +58,12 @@ You will automatically download a JSON file with credentials. It may look like t
     ...
 }}
 ```
-Remember the path to the downloaded credentials file. Also, in the next step you’ll need
+Remember the path to the downloaded credentials file. Also, in the next step you'll need
 the value of client_email from this file.
 
 * **:red[Very important!]** Go to your
 spreadsheet and share it with a client_email from the step above. Just like you do with
-any other Google account. If you don’t do this, you’ll get a
+any other Google account. If you don't do this, you'll get a
 `gspread.exceptions.SpreadsheetNotFound` exception when trying to access this
 spreadsheet from your application or a script.
 
@@ -127,7 +127,7 @@ with st.echo():
 st.write("#### 4. Read Google WorkSheet as DataFrame")
 st.info(
     "If the sheet has been deleted, press 'Create new worksheet' button above.",
-    icon="ℹ️",
+    icon="ℹ️",  # noqa: RUF001
 )
 
 with st.echo():
@@ -178,7 +178,7 @@ with st.echo():
 st.write("#### 6. Query Google WorkSheet with SQL and get results as DataFrame")
 st.info(
     "Mutation SQL queries are in-memory only and do not results in the Worksheet update.",
-    icon="ℹ️",
+    icon="ℹ️",  # noqa: RUF001
 )
 
 

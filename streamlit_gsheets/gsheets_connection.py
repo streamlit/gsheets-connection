@@ -33,8 +33,8 @@ from numpy import ndarray
 from pandas import DataFrame, read_csv
 from sql_metadata import Parser
 from streamlit.connections import ExperimentalBaseConnection
-from streamlit.runtime.caching import cache_data
 from streamlit.dataframe_util import convert_anything_to_pandas_df, is_dataframe_like
+from streamlit.runtime.caching import cache_data
 from validators.url import url as validate_url
 
 
@@ -46,7 +46,7 @@ class GSheetsClient(ABC):
     def __init__(self, secrets_dict: dict):
         self._spreadsheet = secrets_dict.pop("spreadsheet", None)
         self._worksheet = secrets_dict.pop("worksheet", None)
-        if secrets_dict.get("type", None) == "service_account":
+        if secrets_dict.get("type") == "service_account":
             self._optional_client = service_account_from_dict(secrets_dict)
 
     def set_default(
@@ -142,9 +142,8 @@ class GSheetsServiceAccountClient(GSheetsClient):
         try:
             if validate_url(spreadsheet):
                 return self._client.open_by_url(url=spreadsheet)
-            else:
-                raise ValidationError("spreadsheet is not URL", arg_dict={"spreadsheet": spreadsheet})
-        except ValidationError:
+            raise ValueError(f"spreadsheet is not URL: {spreadsheet}")
+        except ValueError:
             return self._client.open(title=spreadsheet, folder_id=folder_id)
 
     def _select_worksheet(
@@ -157,13 +156,16 @@ class GSheetsServiceAccountClient(GSheetsClient):
         if type(worksheet) is Worksheet:
             return worksheet
 
-        if not spreadsheet and self._spreadsheet:
+        if spreadsheet is None and self._spreadsheet:
             spreadsheet = self._spreadsheet
-        if not folder_id and self._worksheet:
+        if folder_id is None and self._worksheet:
             folder_id = self._worksheet
 
         if isinstance(spreadsheet, str):
             spreadsheet = self._open_spreadsheet(spreadsheet=spreadsheet, folder_id=folder_id)
+
+        if spreadsheet is None:
+            raise ValueError("Spreadsheet must not be None")
 
         if isinstance(worksheet, str):
             return spreadsheet.worksheet(worksheet)
@@ -208,7 +210,6 @@ class GSheetsServiceAccountClient(GSheetsClient):
         sql: str,
         *,  # keyword-only arguments:
         spreadsheet: Optional[str] = None,
-        worksheet: Optional[Union[int, str]] = None,
         ttl: Optional[Union[int, timedelta, None]] = 3600,
         max_entries: Optional[Union[int, None]] = None,
         evaluate_formulas: bool = True,
@@ -331,7 +332,7 @@ class GSheetsServiceAccountClient(GSheetsClient):
         return self._select_worksheet(spreadsheet=spreadsheet, worksheet=worksheet, folder_id=folder_id).clear()
 
 
-class UnsupportedOperationException(Exception):
+class UnsupportedOperationError(Exception):
     pass
 
 
@@ -366,8 +367,7 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
                 if final_gid:
                     return f"{url}&gid={final_gid}"
                 return url
-            else:
-                raise validation_failure
+            raise validation_failure
         except (ValueError, TypeError):
             url = f"https://docs.google.com/spreadsheet/ccc?key={spreadsheet}&output=csv"
             if worksheet:
@@ -434,46 +434,24 @@ class GSheetsPublicSpreadsheetClient(GSheetsClient):
 
         return _query(sql, url, **options)
 
-    def create(
-        self,
-        *,
-        spreadsheet: Optional[str] = None,
-        worksheet: Optional[str] = None,
-        data: Optional[Union[DataFrame, ndarray, List[list], List[dict]]] = None,
-        folder_id: Optional[str] = None,
-    ) -> DataFrame:
-        raise UnsupportedOperationException(
-            "Use Service Account authentication to enable CRUD methods on your Spreadsheets."
-        )
+    def create(self, *args, **kwargs) -> DataFrame:  # noqa: ARG002
+        raise UnsupportedOperationError("Use Service Account authentication to enable CRUD methods on your Spreadsheets.")
 
-    def update(
-        self,
-        *,
-        spreadsheet: Optional[Union[str, Spreadsheet]] = None,
-        worksheet: Optional[Union[str, int, Worksheet]] = None,
-        data: Optional[Union[DataFrame, ndarray, List[list], List[dict]]] = None,
-        folder_id: Optional[str] = None,
-    ) -> DataFrame:
-        raise UnsupportedOperationException(
+    def update(self, *args, **kwargs) -> DataFrame:  # noqa: ARG002
+        raise UnsupportedOperationError(
             "Public Spreadsheet cannot be written to, "
             "use Service Account authentication to enable CRUD methods on your Spreadsheets."
         )
 
-    def clear(
-        self,
-        *,
-        spreadsheet: Optional[Union[str, Spreadsheet]] = None,
-        worksheet: Optional[Union[str, int, Worksheet]] = None,
-        folder_id: Optional[str] = None,
-    ):
-        raise UnsupportedOperationException(
+    def clear(self, *args, **kwargs):  # noqa: ARG002
+        raise UnsupportedOperationError(
             "Public Spreadsheet cannot be cleared, "
             "use Service Account authentication to enable CRUD methods on your Spreadsheets."
         )
 
 
 class GSheetsConnection(ExperimentalBaseConnection[GSheetsClient], GSheetsClient):
-    def _connect(self, **kwargs) -> GSheetsClient:
+    def _connect(self) -> GSheetsClient:
         """Reads st.connection .streamlit/secrets.toml and returns GSheets
         client based on them."""
         secrets_dict = self._secrets.to_dict()
@@ -736,11 +714,10 @@ class GSheetsConnection(ExperimentalBaseConnection[GSheetsClient], GSheetsClient
         else:
             name = ""
             cfg = ""
-        md = f"""
+        return f"""
         ---
         **st.connection {name}built from `{module_name}.{class_name}`**
         {cfg}
         - Learn more using `st.help()`
         ---
         """
-        return md

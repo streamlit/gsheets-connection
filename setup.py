@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import setuptools
 
 VERSION = "0.0.4"  # PEP-440
@@ -42,6 +44,6 @@ setuptools.setup(
     # Requirements
     install_requires=INSTALL_REQUIRES,
     packages=["streamlit_gsheets"],
-    long_description=open("README.md").read(),
+    long_description=Path("README.md").read_text(),
     long_description_content_type="text/markdown",
 )

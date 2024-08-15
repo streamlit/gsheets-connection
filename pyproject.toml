@@ -1,7 +1,9 @@
 [tool.ruff]
 exclude = [".git", ".vscode", ".pytest_cache", ".mypy_cache", ".env"]
-ignore = ["B008", "ISC001", "E501", "W191"]
 line-length = 125
+
+[tool.ruff.lint]
+ignore = ["B008", "ISC001", "E501", "W191"]
 select = [
     "B",
     "E",

@@ -8,7 +8,7 @@ from pandas.testing import assert_frame_equal
 from streamlit_gsheets import GSheetsConnection
 
 
-@pytest.fixture
+@pytest.fixture()
 def expected_df() -> pd.DataFrame:
     return pd.DataFrame(
         {
@@ -41,9 +41,7 @@ def test_query_public_sheet():
 
 def test_query_worksheet_public_sheet():
     url = "https://docs.google.com/spreadsheets/d/1JDy9md2VZPz4JbYtRPJLs81_3jUK47nx6GYQjgU8qNY/edit"
-    worksheet = (
-        1585633377  # Example 2, note that this is the gid, not the worksheet name
-    )
+    worksheet = 1585633377  # Example 2, note that this is the gid, not the worksheet name
 
     conn = st.connection("connection_name", type=GSheetsConnection)
 
@@ -75,5 +73,5 @@ def test_secrets_contents(expected_df):
 def test_no_secrets_contents():
     conn = st.connection("other_connection_name", type=GSheetsConnection)
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Spreadsheet must be specified"):
         conn.read()

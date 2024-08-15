@@ -19,7 +19,7 @@ with st.echo():
 st.write("#### 2. Query public Google Worksheet using SQL")
 st.info(
     "Mutation SQL queries are in-memory only and do not results in the Worksheet update.",
-    icon="ℹ️",
+    icon="ℹ️",  # noqa: RUF001
 )
 st.warning(
     """You can query only one Worksheet in provided public Spreadsheet,
