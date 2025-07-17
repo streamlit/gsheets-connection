@@ -12,7 +12,7 @@ repos:
     rev: v1.11.1
     hooks:
       - id: mypy
-        language_version: python3.8
+        language_version: python3.11
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
