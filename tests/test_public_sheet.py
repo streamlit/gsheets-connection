@@ -8,7 +8,7 @@ from pandas.testing import assert_frame_equal
 from streamlit_gsheets import GSheetsConnection
 
 
-@pytest.fixture()
+@pytest.fixture
 def expected_df() -> pd.DataFrame:
     return pd.DataFrame(
         {
